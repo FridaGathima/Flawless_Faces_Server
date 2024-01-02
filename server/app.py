@@ -53,7 +53,7 @@ with app.app_context():
     # 17. /haircare/conditioners
     # 18. /haircare/hairgels
     # 19. /haircare/hairfood
-    # 20. /brands
+    # 20. /brands ***DONE 
 
 
 class Home(Resource):
@@ -99,12 +99,22 @@ class ProductBySubCategory(Resource):
         else:
             return jsonify({"error": "sub-category not found"})
         
+class ProductByBrands(Resource):
+    def get(self,brand_name):
+        brand_list=Product.query.filter_by(brand_name=brand_name)
+
+        if brand_list:
+            return jsonify({"products": [product.to_dict() for product in brand_list]}, 200)
+        else:
+            return jsonify({"error": "brand not found"})
+                
     
 
 api.add_resource(Home, '/')
 api.add_resource(ProductsList, '/products')
 api.add_resource(ProductByCategory, '/products/<string:category>')
 api.add_resource(ProductBySubCategory, '/products/category/<string:sub_category>')
+api.add_resource(ProductByBrands, '/<string:brand_name>')
 
 
 
