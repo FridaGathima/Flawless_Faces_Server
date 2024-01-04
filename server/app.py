@@ -136,7 +136,6 @@ class UserList(Resource):
         
 class UserLogin(Resource):
     def post(self):
-
         data=request.get_json()
         email = data.get('email')
         password = data.get('password')
@@ -154,40 +153,24 @@ class UserLogin(Resource):
         return response
     
 class UserRegistration(Resource):
-    pass
+    def post(self):
+        data=request.get_json()
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        email = data.get('email')
+        password = data.get('password')
 
+        user = User.query.filter_by(email=email).first()
 
-
-        # user = User.query.filter(User.email == email).first()
-        # if user and user.authenticate(password):
-        #     session['user_id'] = user.id
-        #     return user.to_dict(), 200
-        # else:
-        #     return {'error': '401 Unauthorized'}, 401
+        if user:
+            return make_response({"message":"User alsredy exists"}, 400)
+        else:
+            new_user = User(first_name=first_name, last_name=last_name, email=email, password=password)
+            db.session.add(new_user)
+            db.session.commit()
+            
+            return make_response({"message": "User created successfully"}, 201)
         
-
-        # data = request.get_json()  # Use request.get_json() to get JSON data
-
-        # response = None  # Initialize the response variable
-
-        # if not data or 'email' not in data or 'password' not in data:
-        #     response = make_response(jsonify(message='Invalid request'), 400)
-        # else:
-        #     email = data['email']
-        #     password = data['password']
-        #     # Assuming User is your SQLAlchemy model representing the user table
-        #     user = User.query.filter_by(email=email).first()
-
-        #     if user and (user.password == password):
-        #         # Continue with the authentication process
-        #         # access_token = create_access_token(identity=admin.AdminID)
-        #         # response = make_response(jsonify(access_token=access_token), 200)
-        #         return jsonify({'message': 'user login successful'})
-        #     else:
-        #          response = make_response(jsonify({'error': 'Invalid email or password'}), 401)
-
-        # return response
-                
 
 
 api.add_resource(Home, '/')
