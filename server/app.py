@@ -1,9 +1,12 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response, request, session
 from flask_restful import Resource, Api
 # from models import User, Payment, Product, Cart, Sale, Brand
 from models import *
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required
+import bcrypt
+from flask_cors import CORS
 
 class CaseInsensitiveApi(Api):
     def url_for(self, resource, **values):
@@ -23,10 +26,13 @@ api = CaseInsensitiveApi(app)
 api = Api(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///flawless_faces.db"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY']='1OH1BiZEkLSoN9rQkIb52sO5AC0vTV9LoyQ3vXY0g0g'
 
 # db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 api = Api(app)
+CORS(app)
+jwt = JWTManager(app)
 db.init_app(app)
 with app.app_context():
     db.create_all()
@@ -54,6 +60,17 @@ with app.app_context():
     # 18. /haircare/hairgels
     # 19. /haircare/hairfood
     # 20. /brands ***DONE 
+    # 21. /login
+    # 22. /register
+    # 23. /cart
+
+# Cart Management
+    # what happens when a user clicks on cart
+    # cart to be added +1 and added to cart db
+    # when items goes to checkout the item should reduce in the db and added in purchases
+    # customer clicked add to cart - db cart increases in item - clicks checkout/pay item deleted from cart and added to payments and deleted in products
+    # customer clicks on delete from cart removes item from cart delete cart db 
+    # cart table purchases table
 
 
 class Home(Resource):
@@ -107,14 +124,81 @@ class ProductByBrands(Resource):
             return jsonify({"products": [product.to_dict() for product in brand_list]}, 200)
         else:
             return jsonify({"error": "brand not found"})
-                
+        
+class UserList(Resource):
+    def get(self):
+        user_list = User.query.all()
+
+        if user_list:
+            return jsonify({"users": [product.to_dict() for product in user_list]}, 200)
+        else:
+            return jsonify({"error": "user not found"})
+        
+class UserLogin(Resource):
+    def post(self):
+
+        data=request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+      
+        user = User.query.filter_by(email=email, password=password).first()
+            
+        if user:
+            access_token = create_access_token(identity=user.user_id)
+            response=make_response(jsonify(access_token=access_token), 200)
+        elif not email or not password:
+            response = make_response({"message": "Missing email or password"}, 400)
+            return response
+        else:
+            return make_response({"message":"Invalid email or password"})
+        return response
     
+class UserRegistration(Resource):
+    pass
+
+
+
+        # user = User.query.filter(User.email == email).first()
+        # if user and user.authenticate(password):
+        #     session['user_id'] = user.id
+        #     return user.to_dict(), 200
+        # else:
+        #     return {'error': '401 Unauthorized'}, 401
+        
+
+        # data = request.get_json()  # Use request.get_json() to get JSON data
+
+        # response = None  # Initialize the response variable
+
+        # if not data or 'email' not in data or 'password' not in data:
+        #     response = make_response(jsonify(message='Invalid request'), 400)
+        # else:
+        #     email = data['email']
+        #     password = data['password']
+        #     # Assuming User is your SQLAlchemy model representing the user table
+        #     user = User.query.filter_by(email=email).first()
+
+        #     if user and (user.password == password):
+        #         # Continue with the authentication process
+        #         # access_token = create_access_token(identity=admin.AdminID)
+        #         # response = make_response(jsonify(access_token=access_token), 200)
+        #         return jsonify({'message': 'user login successful'})
+        #     else:
+        #          response = make_response(jsonify({'error': 'Invalid email or password'}), 401)
+
+        # return response
+                
+
 
 api.add_resource(Home, '/')
 api.add_resource(ProductsList, '/products')
 api.add_resource(ProductByCategory, '/products/<string:category>')
 api.add_resource(ProductBySubCategory, '/products/category/<string:sub_category>')
 api.add_resource(ProductByBrands, '/<string:brand_name>')
+api.add_resource(UserList, '/users')
+api.add_resource(UserLogin, '/login')
+api.add_resource(UserRegistration, '/register')
+
 
 
 
