@@ -10,7 +10,7 @@ fake = Faker()
 
 all_products = ['Maybelline FitMe Foundation', 'Revlon Foundation', 'Fenty Beauty Foundation', 'Biw Biw Allure Eyeshadow Pallet', 'Nouba Reflecta Liptstick', 'Maybelline Superstay Ink Liquid Lipstick', 'Revlon ColorStay 16hr Eyeshadow', 'Maybelline Great Lash Mascara - Black', 'Neutrogena Hydroboost Sunscreen SPF 50', 'Acnes UV Tint Sunscreen SPF 30', 'Cetaphil Sheer Mineral Sunscreen SPF 50', 'Neutrogena Acne Wash Pink Grape Fruit', 'Cetaphil Gentle Skin Cleanser', 'Acnes Creamy Wash Cleanser', 'Neutrogena Hydroboost Water Gel Moisturizer', 'Cetaphil Intensive Moisturizing Cream', 'Neutrogena Oil Free Acne Stress Control Toner', 'Cetaphil Healthy Radiance Brightness Toner', 'Acnes Soothing Toner', 'African Pride Miracle Moisture Shampoo', 'Shea Moisture Butter Shampoo', 'Mizani Moisture Fusion Shampoo', 'African Pride Miracle Moisture Conditioner', 'Shea Moisture Restorative Conditioner', 'Mizani Miracle Leave-in Conditioner', 'African Pride Aloe Defining Gel', 'Shea Moisture Frizz Control Curling Gel', 'Mizani Rose Hair Dress']
 
-all_brands = ['Maybelline', 'Nouba', 'Fenty Beauty', 'Biw Biw', 'Acnes', 'Cetaphil', 'Neutrogena', 'African Pride', 'Shea Moisture', 'Mizani']
+all_brands = ['maybelline', 'nouba', 'fenty beauty', 'biw biw', 'acnes', 'cetaphil', 'neutrogena', 'african Pride', 'shea Moisture', 'mizani']
 
 sub_categories = ['Lip Makeup', 'Face Makeup', 'Eye Makeup', 'Sunscreen', 'Cleansers', 'Moisturizers','Face Toners','Shampoo','Conditioners','Hair_Gels', 'Hair Food']
 
@@ -87,6 +87,7 @@ def seed_data():
     sales = []
     for _ in range(10):
         sale = Sale(
+            cart_id=random.randint(1, 10),
             payment_id=random.randint(1, 10),
             date_of_sale=datetime.now(),
         
