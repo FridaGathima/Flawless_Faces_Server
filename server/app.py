@@ -163,14 +163,74 @@ class UserRegistration(Resource):
         user = User.query.filter_by(email=email).first()
 
         if user:
-            return make_response({"message":"User alsredy exists"}, 400)
+            return make_response({"message":"User already exists"}, 400)
         else:
             new_user = User(first_name=first_name, last_name=last_name, email=email, password=password)
             db.session.add(new_user)
             db.session.commit()
             
             return make_response({"message": "User created successfully"}, 201)
+
+# Cart Management
+    # what happens when a user clicks on cart
+    # cart to be added +1 and added to cart db
+    # when items goes to checkout the item should reduce in the  cart db and added in purchases
+    # customer clicked add to cart - db cart increases in item - clicks checkout/pay item deleted from cart and added to payments and deleted in products
+    # customer clicks on delete from cart removes item from cart delete cart db 
+    # cart table purchases table
+    
+
+class CartManagement(Resource):
+    def post(self):
+        data = request.get_json()
+        user_id=data.get('user_id')
+        product_id=data.get('product_id')
+        quantity=data.get('quantity')
+        total_amount=data.get('total_amount')
+
+        user = User.query.filter_by(user_id=user_id).first() 
+
+        if not user:
+            return {'message': 'User not found'}, 404
+        else:
+            # cart=Cart.query.filter_by(user_id=user_id).first()
+             
+            # if not cart:
+            cart=Cart(user_id=user_id, product_id=product_id, quantity=quantity, total_amount=total_amount)
+            db.session.add(cart)
+            db.session.commit()
         
+            return make_response({'message': 'Items added to the cart successfully'}, 200)
+        
+class PaymentCheckoutManagement(Resource):
+    def post(self):
+        data = request.get_json()
+        cart_id = data.get('cart_id')
+        payment_method= data.get('payment_method')
+        payment_id=data.get('payment_id')
+
+
+        # purchase_item=Payment.query.filter_by(cart_id=cart_id).first()
+        cart_item=Cart.query.filter_by(cart_id=cart_id).first()
+        new_purchase_item=Payment(cart_id=cart_id, payment_method=payment_method)
+        new_sales_item=Sale(cart_id=cart_id, payment_id=payment_id)
+
+        if cart_item:
+            db.session.delete(cart_item)
+            db.session.add(new_purchase_item)
+            db.session.add(new_sales_item)
+            db.session.commit()
+
+            return {'message': 'payment successful. check sales'}, 200
+        else:
+            # new_purchase_item=Payment(cart_id=cart_id, payment_method=payment_method)
+            # db.session.add(new_purchase_item)
+            # db.session.commit()
+            return {'message': 'payment was not successful. please try again.'}, 200
+
+   
+        
+
 
 
 api.add_resource(Home, '/')
@@ -181,6 +241,8 @@ api.add_resource(ProductByBrands, '/<string:brand_name>')
 api.add_resource(UserList, '/users')
 api.add_resource(UserLogin, '/login')
 api.add_resource(UserRegistration, '/register')
+api.add_resource(CartManagement, '/cart')
+api.add_resource(PaymentCheckoutManagement, '/payments')
 
 
 
