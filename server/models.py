@@ -127,6 +127,7 @@ class Cart(db.Model, SerializerMixin):
     product = db.relationship('Product', back_populates = 'cart')
     # one to one relationship
     payment = db.relationship('Payment', back_populates = 'cart', uselist=False)
+    sale = db.relationship('Sale', back_populates = 'cart', uselist=False)
 
     def to_dict(self):
         return {
@@ -154,8 +155,8 @@ class Payment(db.Model, SerializerMixin):
     # Database relationships
     # one to many relationship
     cart = db.relationship('Cart', back_populates = 'payment')
-    sale = db.relationship('Sale', back_populates = 'payment')
-
+    sale = db.relationship('Sale', back_populates = 'payment', uselist=False)
+    
     def to_dict(self):
         return {
             "payment_id":self.payment_id,
@@ -173,17 +174,22 @@ class Payment(db.Model, SerializerMixin):
 class Sale(db.Model, SerializerMixin):
     __tablename__ = 'sales'
 
-    sales_id =  payment_id = db.Column(db.Integer, primary_key = True)
+    sales_id = db.Column(db.Integer, primary_key = True)
+    cart_id = db.Column(db.Integer, db.ForeignKey('carts.cart_id'))
     payment_id = db.Column(db.Integer, db.ForeignKey('payments.payment_id'))
     date_of_sale = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Database relationship
     # one to one relationship
-    payment = db.relationship('Payment', back_populates = 'sale', uselist=False)
+    # payment = db.relationship('Payment', back_populates = 'sale', uselist=False)
+    payment = db.relationship('Payment', back_populates = 'sale')
+    cart = db.relationship('Cart', back_populates = 'sale')
+    
 
     def to_dict(self):
         return { 
            "sales_id" :self.sales_id,
+           "cart_id":self.cart_id,
            "payment_id":self.payment_id,
            "date_of_sale":self.date_of_sale
         }
