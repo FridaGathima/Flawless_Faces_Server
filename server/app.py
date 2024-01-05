@@ -208,15 +208,18 @@ class PaymentCheckoutManagement(Resource):
         cart_id = data.get('cart_id')
         payment_method= data.get('payment_method')
         payment_id=data.get('payment_id')
-
+        product_id=data.get('product_id')
 
         # purchase_item=Payment.query.filter_by(cart_id=cart_id).first()
         cart_item=Cart.query.filter_by(cart_id=cart_id).first()
         new_purchase_item=Payment(cart_id=cart_id, payment_method=payment_method)
         new_sales_item=Sale(cart_id=cart_id, payment_id=payment_id)
+        # deleted_product_item=Product(product_id=product_id)
+        # item should be deleted from product quantity. infact there should be another column for product quantity in products table
 
         if cart_item:
             db.session.delete(cart_item)
+            # db.session.delete(deleted_product_item)
             db.session.add(new_purchase_item)
             db.session.add(new_sales_item)
             db.session.commit()
